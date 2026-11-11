@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    direction: rtl;
+    text-align: right;
+    font-family: 'Cairo', 'Tajawal', system-ui, -apple-system, sans-serif;
+    background-color: #f1f5f9; /* Light pristine background */
+    color: #1e293b; /* Dark slate text for high readability */
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #e2e8f0;
+}
+::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Pristine light glassmorphism & cards */
+.light-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+/* Official Paper Print Styles */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+  
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: 'Cairo', serif !important;
+    font-size: 11pt !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .no-print,
+  nav,
+  aside,
+  header,
+  .sidebar,
+  .app-header,
+  .print-hide {
+    display: none !important;
+  }
+
+  .print-area {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  /* Table borders in print */
+  .official-table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+  .official-table th,
+  .official-table td {
+    border: 1.5px solid #000000 !important;
+    padding: 4px 6px !important;
+    font-size: 9.5pt !important;
+    color: #000000 !important;
+    background-color: transparent !important;
+  }
+  .official-table th {
+    background-color: #f1f5f9 !important;
+    font-weight: 700 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .page-break-after {
+    page-break-after: always;
+  }
+}

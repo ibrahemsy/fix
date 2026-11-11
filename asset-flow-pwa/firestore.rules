@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isHeadOfDept() {
+      return isSignedIn() && (
+        request.auth.token.email == 'ferasnatof@gmail.com' ||
+        request.auth.token.email == 'gfa437926@gmail.com' ||
+        (exists(/databases/$(database)/documents/systemSettings/headOffice) &&
+         get(/databases/$(database)/documents/systemSettings/headOffice).data.headEmail == request.auth.token.email)
+      );
+    }
+
+    // Individual user sandbox
+    match /users/{userId}/{allPaths=**} {
+      allow read, write: if isSignedIn() && (request.auth.uid == userId || isHeadOfDept());
+    }
+
+    // Shared department database (Central inventory & infrastructure)
+    match /department_data/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if isHeadOfDept();
+    }
+
+    // Pending approval requests submitted by staff/technicians for Head of Department review
+    match /pendingRequests/{requestId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isHeadOfDept();
+    }
+
+    // System settings managed strictly by Head of Department
+    match /systemSettings/{settingId} {
+      allow read: if isSignedIn();
+      allow write: if isHeadOfDept();
+    }
+
+    // Global default-deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

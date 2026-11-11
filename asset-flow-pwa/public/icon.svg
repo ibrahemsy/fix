@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f2942"/>
+      <stop offset="50%" stop-color="#1e3a8a"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Circle / Shield -->
+  <rect width="512" height="512" rx="110" fill="url(#bgGrad)"/>
+  <rect x="16" y="16" width="480" height="480" rx="98" fill="none" stroke="#38bdf8" stroke-width="4" stroke-opacity="0.4"/>
+  
+  <!-- Outer Radar Waves -->
+  <circle cx="256" cy="220" r="160" fill="none" stroke="#38bdf8" stroke-width="3" stroke-dasharray="8 8" opacity="0.3"/>
+  <circle cx="256" cy="220" r="110" fill="none" stroke="#38bdf8" stroke-width="3" stroke-dasharray="6 6" opacity="0.5"/>
+  <circle cx="256" cy="220" r="60" fill="none" stroke="#38bdf8" stroke-width="3" opacity="0.7"/>
+
+  <!-- Satellite / Antenna Tower Center -->
+  <path d="M256 110 L256 260 M220 260 L292 260 M230 200 L282 200 M240 150 L272 150 M256 100 L256 70" stroke="url(#goldGrad)" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="256" cy="70" r="10" fill="#fbbf24"/>
+  <path d="M200 90 A70 70 0 0 1 312 90" fill="none" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+  <path d="M180 70 A100 100 0 0 1 332 70" fill="none" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Weather Cloud Symbol with Sun/Signal -->
+  <path d="M160 300 C140 300 120 315 120 335 C120 355 140 370 160 370 L352 370 C375 370 392 352 392 330 C392 310 378 295 360 292 C355 265 330 245 300 245 C280 245 262 255 252 270 C242 262 230 258 216 258 C188 258 165 277 160 300 Z" fill="#ffffff" opacity="0.95"/>
+
+  <!-- Badge / Computer & Equipment Symbol below -->
+  <rect x="180" y="390" width="152" height="70" rx="12" fill="#0f172a" stroke="#38bdf8" stroke-width="4"/>
+  <rect x="236" y="460" width="40" height="20" fill="#38bdf8"/>
+  <rect x="216" y="476" width="80" height="8" rx="4" fill="#38bdf8"/>
+  <!-- Status LED on PC -->
+  <circle cx="204" cy="425" r="6" fill="#10b981"/>
+  <line x1="224" y1="415" x2="310" y2="415" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+  <line x1="224" y1="435" x2="280" y2="435" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+</svg>

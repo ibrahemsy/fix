@@ -1,0 +1,205 @@
+{
+  "entities": {
+    "CustodyCard": {
+      "title": "CustodyCard",
+      "description": "Personal custody card for IT equipment and accessories matching official Syrian Meteorology form",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "cardNumber": { "type": "string", "maxLength": 50 },
+        "employeeName": { "type": "string", "maxLength": 150 },
+        "jobTitle": { "type": "string", "maxLength": 100 },
+        "directorate": { "type": "string", "maxLength": 100 },
+        "workCenter": { "type": "string", "maxLength": 100 },
+        "department": { "type": "string", "maxLength": 100 },
+        "division": { "type": "string", "maxLength": 100 },
+        "officeOrCenter": { "type": "string", "maxLength": 100 },
+        "creationDate": { "type": "string", "maxLength": 50 },
+        "items": { "type": "array" },
+        "employeeSignature": { "type": "string", "maxLength": 100 },
+        "deliveryOfficerSignature": { "type": "string", "maxLength": 100 },
+        "deptHeadSignature": { "type": "string", "maxLength": 100 },
+        "warehouseKeeperSignature": { "type": "string", "maxLength": 100 },
+        "adminEndorsement": { "type": "string", "maxLength": 200 },
+        "endorsementDate": { "type": "string", "maxLength": 50 },
+        "status": { "type": "string", "maxLength": 30 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "createdBy": { "type": "string" }
+      },
+      "required": ["cardNumber", "employeeName", "items", "creationDate"]
+    },
+    "Device": {
+      "title": "Device",
+      "description": "Inventory device or technical equipment",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 150 },
+        "category": { "type": "string", "maxLength": 80 },
+        "manufacturer": { "type": "string", "maxLength": 80 },
+        "model": { "type": "string", "maxLength": 80 },
+        "serialNumber": { "type": "string", "maxLength": 100 },
+        "assetNumber": { "type": "string", "maxLength": 80 },
+        "purchaseDate": { "type": "string", "maxLength": 50 },
+        "supplier": { "type": "string", "maxLength": 100 },
+        "condition": { "type": "string", "maxLength": 50 },
+        "status": { "type": "string", "maxLength": 50 },
+        "location": { "type": "string", "maxLength": 100 },
+        "assignedEmployee": { "type": "string", "maxLength": 150 },
+        "assignedStationOrDept": { "type": "string", "maxLength": 150 },
+        "deliveryDate": { "type": "string", "maxLength": 50 },
+        "warrantyEnd": { "type": "string", "maxLength": 50 },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "attachments": { "type": "array" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["name", "category", "serialNumber"]
+    },
+    "Movement": {
+      "title": "Movement",
+      "description": "Equipment handover, return, transfer, or decommission transaction",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "referenceNumber": { "type": "string", "maxLength": 50 },
+        "type": { "type": "string", "maxLength": 50 },
+        "deviceId": { "type": "string", "maxLength": 100 },
+        "deviceName": { "type": "string", "maxLength": 150 },
+        "serialNumber": { "type": "string", "maxLength": 100 },
+        "fromEntity": { "type": "string", "maxLength": 150 },
+        "toEntity": { "type": "string", "maxLength": 150 },
+        "executorName": { "type": "string", "maxLength": 150 },
+        "date": { "type": "string", "maxLength": 50 },
+        "reason": { "type": "string", "maxLength": 500 },
+        "signatures": { "type": "object" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["referenceNumber", "type", "date", "executorName"]
+    },
+    "Station": {
+      "title": "Station",
+      "description": "Meteorological observation station directory and telecom info",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "code": { "type": "string", "maxLength": 20 },
+        "location": { "type": "string", "maxLength": 150 },
+        "connectionType": { "type": "string", "maxLength": 80 },
+        "connectionStatus": { "type": "string", "maxLength": 50 },
+        "responsibleTechnician": { "type": "string", "maxLength": 150 },
+        "lastMaintenanceDate": { "type": "string", "maxLength": 50 },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "equipmentCount": { "type": "number" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["name", "code"]
+    },
+    "MaintenanceTicket": {
+      "title": "MaintenanceTicket",
+      "description": "Maintenance request and fault report ticket",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "ticketNumber": { "type": "string", "maxLength": 50 },
+        "deviceId": { "type": "string", "maxLength": 100 },
+        "deviceName": { "type": "string", "maxLength": 150 },
+        "faultDescription": { "type": "string", "maxLength": 1000 },
+        "stationOrDept": { "type": "string", "maxLength": 150 },
+        "reportDate": { "type": "string", "maxLength": 50 },
+        "priority": { "type": "string", "maxLength": 30 },
+        "assignedTech": { "type": "string", "maxLength": 150 },
+        "actionsTaken": { "type": "string", "maxLength": 1000 },
+        "sparePartsUsed": { "type": "string", "maxLength": 500 },
+        "resolutionDate": { "type": "string", "maxLength": 50 },
+        "status": { "type": "string", "maxLength": 50 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["ticketNumber", "faultDescription", "reportDate", "status"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Immutable security and audit log",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "action": { "type": "string", "maxLength": 100 },
+        "entity": { "type": "string", "maxLength": 100 },
+        "entityId": { "type": "string", "maxLength": 100 },
+        "userName": { "type": "string", "maxLength": 150 },
+        "userEmail": { "type": "string", "maxLength": 150 },
+        "timestamp": { "type": "string", "maxLength": 50 },
+        "details": { "type": "string", "maxLength": 1000 }
+      },
+      "required": ["action", "entity", "timestamp"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with role-based permissions and account status",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string", "maxLength": 150 },
+        "displayName": { "type": "string", "maxLength": 150 },
+        "role": { "type": "string", "maxLength": 50 },
+        "department": { "type": "string", "maxLength": 100 },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected", "disabled"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["email", "role", "status"]
+    },
+    "AccessRequest": {
+      "title": "AccessRequest",
+      "description": "Request from a technician to join the department app",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string", "maxLength": 150 },
+        "userEmail": { "type": "string", "maxLength": 150 },
+        "department": { "type": "string", "maxLength": 100 },
+        "jobTitle": { "type": "string", "maxLength": 100 },
+        "reason": { "type": "string", "maxLength": 500 },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "requestedAt": { "type": "string" }
+      },
+      "required": ["userId", "userName", "status"]
+    }
+  },
+  "firestore": {
+    "/custodyCards/{cardId}": {
+      "schema": "CustodyCard",
+      "description": "Collection of personal custody cards"
+    },
+    "/devices/{deviceId}": {
+      "schema": "Device",
+      "description": "Collection of equipment and inventory hardware"
+    },
+    "/movements/{movementId}": {
+      "schema": "Movement",
+      "description": "Collection of asset movements and handovers"
+    },
+    "/maintenanceTickets/{ticketId}": {
+      "schema": "MaintenanceTicket",
+      "description": "Collection of maintenance tickets and fault reports"
+    },
+    "/auditLogs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Immutable audit trails"
+    },
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profiles and permissions"
+    },
+    "/accessRequests/{requestId}": {
+      "schema": "AccessRequest",
+      "description": "Pending and processed onboarding requests"
+    },
+    "/config/{configId}": {
+      "schema": "object",
+      "description": "Global app configuration like adminUid"
+    }
+  }
+}

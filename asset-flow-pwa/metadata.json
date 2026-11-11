@@ -1,0 +1,6 @@
+{
+  "name": "Asset Flow PWA",
+  "description": "Cross-platform asset management system with Google Sheets integration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

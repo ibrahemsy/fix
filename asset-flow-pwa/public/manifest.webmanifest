@@ -1,0 +1,20 @@
+{
+  "name": "نظام إدارة الاتصالات والتجهيزات التقنية - الأرصاد الجوية السورية",
+  "short_name": "إدارة العهد والأجهزة",
+  "description": "النظام الإلكتروني الموحد لإدارة العهد والأجهزة ومحطات الرصد الجوي - المركز الوطني للأرصاد الجوية السورية",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f2942",
+  "theme_color": "#1e3a8a",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "512x512 192x192 144x144 96x96 48x48",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
