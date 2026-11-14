@@ -72,6 +72,8 @@ jobs:
         run: bash tool/prepare_platforms.sh
       - name: Install packages
         run: flutter pub get
+      - name: Configure iOS deployment target
+        run: python3 tool/configure_ios.py
       - name: Build iOS without signing
         run: flutter build ios --release --no-codesign
       - name: Upload iOS app bundle
