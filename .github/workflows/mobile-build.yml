@@ -60,3 +60,27 @@ jobs:
           name: asset-flow-flutter-web
           path: mobile/asset_flow_mobile/build/web
           if-no-files-found: error
+
+  ios:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: mobile/asset_flow_mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate iOS project and camera permission
+        run: bash tool/prepare_platforms.sh
+      - name: Install packages
+        run: flutter pub get
+      - name: Build iOS without signing
+        run: flutter build ios --release --no-codesign
+      - name: Upload iOS app bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-flow-ios-app
+          path: mobile/asset_flow_mobile/build/ios/iphoneos/Runner.app
+          if-no-files-found: error
