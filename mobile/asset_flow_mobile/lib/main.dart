@@ -429,13 +429,16 @@ class _MobileHomeState extends State<MobileHome> {
 
   @override
   Widget build(BuildContext context) {
-    final titles = ['الرئيسية', 'الأجهزة', 'العُهد', 'الحركات', 'الصيانة'];
+    final titles = ['الرئيسية', 'الأجهزة', 'العُهد', 'الحركات', 'الصيانة', 'الشبكات', 'طلبات الاعتماد', 'سجل التدقيق'];
     final pages = [
       _dashboard(),
       _devices(),
       _records('custodyCards', 'لا توجد بطاقات عهدة مسجلة', Icons.assignment_ind_outlined),
       _records('movements', 'لا توجد حركات مسجلة', Icons.swap_horiz_rounded),
       _records('maintenanceTickets', 'لا توجد بلاغات صيانة', Icons.build_outlined),
+      _records('telecomNetworks', 'لا توجد سجلات بنية تحتية', Icons.hub_outlined),
+      _requests(),
+      _records('auditLogs', 'لا توجد أحداث تدقيق', Icons.fact_check_outlined),
     ];
     return Scaffold(
       appBar: AppBar(
@@ -455,6 +458,38 @@ class _MobileHomeState extends State<MobileHome> {
           ),
         ],
       ),
+      drawer: Drawer(
+        child: SafeArea(
+          child: Column(
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                color: const Color(0xFF155EEF),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.inventory_2, color: Colors.white, size: 34),
+                    const SizedBox(height: 12),
+                    const Text('إدارة الأصول والعُهد', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                    const SizedBox(height: 5),
+                    Text(_user.email ?? '', style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  children: [
+                    _drawerItem(5, 'البنية التحتية والشبكات', Icons.hub_outlined),
+                    _drawerItem(6, 'طلبات الاعتماد', Icons.verified_user_outlined),
+                    _drawerItem(7, 'سجل التدقيق', Icons.fact_check_outlined),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
       body: IndexedStack(index: _tab, children: pages),
       floatingActionButton: _tab == 1
           ? FloatingActionButton.extended(
@@ -464,7 +499,7 @@ class _MobileHomeState extends State<MobileHome> {
             )
           : null,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _tab,
+        selectedIndex: _tab > 4 ? 0 : _tab,
         onDestinationSelected: (value) => setState(() => _tab = value),
         destinations: const [
           NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: 'الرئيسية'),
@@ -474,6 +509,140 @@ class _MobileHomeState extends State<MobileHome> {
           NavigationDestination(icon: Icon(Icons.build_outlined), label: 'الصيانة'),
         ],
       ),
+    );
+  }
+
+  Widget _drawerItem(int index, String label, IconData icon) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(label),
+      selected: _tab == index,
+      onTap: () {
+        setState(() => _tab = index);
+        Navigator.pop(context);
+      },
+    );
+  }
+
+  Future<void> _reviewRequest(
+    QueryDocumentSnapshot<Map<String, dynamic>> document, {
+    required bool approve,
+  }) async {
+    if (!_isHead) return;
+    final request = document.data();
+    final now = DateTime.now().toUtc().toIso8601String();
+    try {
+      if (approve) {
+        final actionType = request['actionType']?.toString() ?? '';
+        final target = request['targetCollection']?.toString() ?? '';
+        final payload = request['payload'] is Map
+            ? Map<String, dynamic>.from(request['payload'] as Map)
+            : <String, dynamic>{};
+        final targetId = (request['targetDocId'] ?? payload['id'])?.toString();
+        if (target.isNotEmpty && targetId != null && targetId.isNotEmpty) {
+          final targetRef = _collection(target).doc(targetId);
+          if (actionType.startsWith('delete')) {
+            await targetRef.delete();
+          } else {
+            await targetRef.set(payload);
+          }
+        }
+      }
+      await document.reference.update({
+        'status': approve ? 'approved' : 'rejected',
+        'reviewedAt': now,
+        'reviewedBy': _user.email ?? _user.uid,
+        if (!approve) 'rejectionReason': 'تم الرفض من تطبيق الموبايل',
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(approve ? 'تم اعتماد الطلب.' : 'تم رفض الطلب.')),
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('تعذرت معالجة الطلب: $error')),
+        );
+      }
+    }
+  }
+
+  Widget _requests() {
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance.collection('pendingRequests').snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) return _errorState(snapshot.error.toString());
+        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+        final docs = snapshot.data!.docs.where((doc) {
+          final data = doc.data();
+          return _isHead || data['requesterUid'] == _user.uid;
+        }).toList();
+        if (docs.isEmpty) {
+          return const Center(child: Text('لا توجد طلبات اعتماد حالياً.'));
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: docs.length,
+          itemBuilder: (context, index) {
+            final doc = docs[index];
+            final data = doc.data();
+            final status = data['status']?.toString() ?? 'pending';
+            final pending = status == 'pending';
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(child: Text(data['title']?.toString() ?? 'طلب اعتماد', style: const TextStyle(fontWeight: FontWeight.bold))),
+                        Chip(
+                          label: Text(status == 'pending' ? 'قيد المراجعة' : status == 'approved' ? 'مقبول' : 'مرفوض'),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Text(data['details']?.toString() ?? ''),
+                    const SizedBox(height: 6),
+                    Text('مقدم الطلب: ${data['requesterName'] ?? data['requesterEmail'] ?? '-'}', style: const TextStyle(fontSize: 12, color: Color(0xFF667085))),
+                    if (_isHead && pending) ...[
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () => _reviewRequest(doc, approve: false),
+                              icon: const Icon(Icons.close),
+                              label: const Text('رفض'),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: FilledButton.icon(
+                              onPressed: () => _reviewRequest(doc, approve: true),
+                              icon: const Icon(Icons.check),
+                              label: const Text('اعتماد'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    if (status == 'rejected' && data['rejectionReason'] != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text('سبب الرفض: ${data['rejectionReason']}', style: const TextStyle(color: Colors.redAccent, fontSize: 12)),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
