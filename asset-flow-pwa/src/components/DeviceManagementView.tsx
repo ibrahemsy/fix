@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Server, 
   Plus, 
@@ -13,8 +13,7 @@ import {
   Image as ImageIcon,
   CheckCircle
 } from 'lucide-react';
-// @ts-ignore
-import QrScanner from 'react-qr-scanner';
+import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { useApp } from '../context/AppContext';
 import { Device, DeviceCategory, DeviceCondition, DeviceStatus, DeviceAttachment } from '../types';
 import { getModelSuggestions } from '../services/aiService';
@@ -36,31 +35,60 @@ export const DeviceManagementView: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
 
-  // Barcode scanner state
-  const [isScanningBarcode, setIsScanningBarcode] = useState(false);
+  // Camera scanner supports QR and common 1D retail/asset barcode formats.
+  const [barcodeScanTarget, setBarcodeScanTarget] = useState<'form' | 'search' | null>(null);
+  const scannerElementId = useRef(`device-barcode-reader-${Date.now()}`);
 
-  const handleScan = (data: any) => {
-    if (data) {
-      const decodedText = typeof data === 'object' ? data.text : data;
-      setFormData(prev => ({
-        ...prev,
-        barcode: String(decodedText).trim(),
-      }));
-      setIsScanningBarcode(false);
-      alert(`تم مسح الباركود بنجاح: ${String(decodedText).trim()}`);
+  const handleScan = (decodedText: string) => {
+    const value = String(decodedText || '').trim();
+    if (!value) return;
+    if (barcodeScanTarget === 'search') {
+      setSearchTerm(value);
+    } else {
+      setFormData(prev => ({ ...prev, barcode: value }));
+      alert(`تم مسح الباركود بنجاح: ${value}`);
     }
+    setBarcodeScanTarget(null);
   };
 
-  const handleError = (err: any) => {
-    console.error("Scanner Error:", err);
-  };
+  useEffect(() => {
+    if (!barcodeScanTarget) return;
+    const scanner = new Html5QrcodeScanner(
+      scannerElementId.current,
+      {
+        fps: 12,
+        qrbox: { width: 260, height: 150 },
+        formatsToSupport: [
+          Html5QrcodeSupportedFormats.QR_CODE,
+          Html5QrcodeSupportedFormats.CODE_128,
+          Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.CODE_93,
+          Html5QrcodeSupportedFormats.EAN_13,
+          Html5QrcodeSupportedFormats.EAN_8,
+          Html5QrcodeSupportedFormats.UPC_A,
+          Html5QrcodeSupportedFormats.UPC_E,
+          Html5QrcodeSupportedFormats.ITF,
+          Html5QrcodeSupportedFormats.DATA_MATRIX,
+        ],
+        rememberLastUsedCamera: true,
+      },
+      false
+    );
+    scanner.render(
+      (decodedText) => handleScan(decodedText),
+      () => undefined
+    );
+    return () => {
+      scanner.clear().catch(() => undefined);
+    };
+  }, [barcodeScanTarget]);
 
-  const startBarcodeScanner = () => {
-    setIsScanningBarcode(true);
+  const startBarcodeScanner = (target: 'form' | 'search' = 'form') => {
+    setBarcodeScanTarget(target);
   };
 
   const stopBarcodeScanner = () => {
-    setIsScanningBarcode(false);
+    setBarcodeScanTarget(null);
   };
 
   const emptyDevice: Device = {
@@ -391,12 +419,20 @@ export const DeviceManagementView: React.FC = () => {
           <div className="relative">
             <input
               type="text"
-              placeholder="البحث بالاسم، رقم الموديل، الرقم التسلسلي..."
+              placeholder="البحث بالاسم، الباركود، رقم الموديل، الرقم التسلسلي..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-9 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-hidden focus:border-blue-500 font-medium"
             />
             <Search className="w-4 h-4 text-slate-400 absolute right-3 top-2.5" />
+            <button
+              type="button"
+              onClick={() => startBarcodeScanner('search')}
+              title="مسح باركود للبحث عن جهاز"
+              className="absolute left-2 top-2 text-blue-600 hover:text-blue-800"
+            >
+              <Camera className="w-4 h-4" />
+            </button>
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
@@ -447,6 +483,18 @@ export const DeviceManagementView: React.FC = () => {
             </select>
           </div>
         </div>
+
+        {barcodeScanTarget === 'search' && (
+          <div className="p-3 bg-slate-900 border border-blue-500 rounded-xl space-y-2">
+            <div className="text-xs text-white text-center font-semibold">امسح باركود الجهاز بكاميرا الهاتف للعثور عليه</div>
+            <div className="w-full max-w-sm mx-auto overflow-hidden rounded-lg bg-white p-2">
+              <div id={scannerElementId.current} />
+            </div>
+            <div className="flex justify-center">
+              <button type="button" onClick={stopBarcodeScanner} className="px-3 py-1 bg-rose-600 text-white font-bold rounded-lg text-xs">إلغاء المسح</button>
+            </div>
+          </div>
+        )}
 
         {/* Real-time search status and active filter indicator */}
         {(searchTerm || selectedCategory !== 'all' || selectedCondition !== 'all' || selectedStatus !== 'all') && (
@@ -817,22 +865,11 @@ export const DeviceManagementView: React.FC = () => {
                   </p>
                 </div>
 
-                {isScanningBarcode && (
+                {barcodeScanTarget === 'form' && (
                   <div className="sm:col-span-2 p-3 bg-slate-900 border border-blue-500 rounded-xl space-y-2">
                     <div className="text-xs text-white text-center font-semibold mb-2">وجه كاميرا الهاتف نحو باركود أو QR الجهاز</div>
-                    <div className="relative w-full max-w-sm mx-auto overflow-hidden rounded-lg bg-black aspect-video flex items-center justify-center">
-                      <QrScanner
-                        delay={300}
-                        onError={handleError}
-                        onScan={handleScan}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        constraints={{
-                          video: { facingMode: 'environment' }
-                        }}
-                      />
-                      <div className="absolute inset-0 border-2 border-blue-500/50 pointer-events-none flex items-center justify-center">
-                        <div className="w-48 h-32 border-2 border-white/30 rounded-lg"></div>
-                      </div>
+                    <div className="w-full max-w-sm mx-auto overflow-hidden rounded-lg bg-white p-2">
+                      <div id={scannerElementId.current} />
                     </div>
                     <div className="flex justify-center">
                       <button
