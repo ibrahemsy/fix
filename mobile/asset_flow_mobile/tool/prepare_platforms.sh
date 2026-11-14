@@ -20,7 +20,7 @@ if p.exists():
         marker = "</dict>"
         index = s.rfind(marker)
         if index >= 0:
-            entry = "  <key>NSCameraUsageDescription</key>\\n  <string>نحتاج إلى الكاميرا لمسح باركود الأجهزة والعُهد.</string>\\n"
+            entry = "  <key>NSCameraUsageDescription</key>\n  <string>نحتاج إلى الكاميرا لمسح باركود الأجهزة والعُهد.</string>\n"
             s = s[:index] + entry + s[index:]
             p.write_text(s)
 PY
