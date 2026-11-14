@@ -44,11 +44,10 @@ export const DeviceManagementView: React.FC = () => {
       const decodedText = typeof data === 'object' ? data.text : data;
       setFormData(prev => ({
         ...prev,
-        serialNumber: decodedText,
-        barcode: decodedText,
+        barcode: String(decodedText).trim(),
       }));
       setIsScanningBarcode(false);
-      alert(`تم مسح الباركود / الرقم التسلسلي بنجاح: ${decodedText}`);
+      alert(`تم مسح الباركود بنجاح: ${String(decodedText).trim()}`);
     }
   };
 
@@ -71,7 +70,7 @@ export const DeviceManagementView: React.FC = () => {
     manufacturer: '',
     model: '',
     serialNumber: '',
-    barcode: `BAR-${Math.floor(100000 + Math.random() * 900000)}`,
+    barcode: `BAR-${Date.now()}`,
     assetNumber: '',
     cpu: '',
     ram: '',
@@ -316,7 +315,15 @@ export const DeviceManagementView: React.FC = () => {
       alert('يرجى ملء اسم الجهاز والرقم التسلسلي.');
       return;
     }
-    await saveDevice(formData);
+    const normalizedBarcode = (formData.barcode || '').trim().toLowerCase();
+    const duplicateBarcode = normalizedBarcode
+      ? devices.find(d => (d.barcode || '').trim().toLowerCase() === normalizedBarcode && d.id !== formData.id)
+      : undefined;
+    if (duplicateBarcode) {
+      alert(`رقم الباركود مستخدم مسبقاً للجهاز: "${duplicateBarcode.name}" (${duplicateBarcode.location}). يرجى إدخال رقم فريد.`);
+      return;
+    }
+    await saveDevice({ ...formData, barcode: (formData.barcode || '').trim() });
     setIsModalOpen(false);
   };
 
@@ -334,6 +341,7 @@ export const DeviceManagementView: React.FC = () => {
       d.model,
       d.manufacturer,
       d.serialNumber,
+      d.barcode || '',
       d.assetNumber,
       d.assignedEmployee || '',
       d.location,
@@ -764,19 +772,9 @@ export const DeviceManagementView: React.FC = () => {
                 </div>
 
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block font-bold text-slate-700">
-                      الرقم التسلسلي <span className="text-rose-600">*</span>
-                    </label>
-                    <button
-                      type="button"
-                      onClick={startBarcodeScanner}
-                      className="px-2 py-0.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-[11px] font-bold flex items-center gap-1 transition"
-                    >
-                      <Camera className="w-3 h-3" />
-                      <span>مسح باركود بالكاميرا</span>
-                    </button>
-                  </div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    الرقم التسلسلي المصنعي <span className="text-rose-600">*</span>
+                  </label>
                   <input
                     type="text"
                     required
@@ -785,6 +783,38 @@ export const DeviceManagementView: React.FC = () => {
                     placeholder="SN-..."
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono focus:outline-hidden focus:border-blue-500"
                   />
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block font-bold text-slate-700">الباركود الداخلي</label>
+                    <button
+                      type="button"
+                      onClick={startBarcodeScanner}
+                      className="px-2 py-0.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-[11px] font-bold flex items-center gap-1 transition"
+                    >
+                      <Camera className="w-3 h-3" />
+                      <span>مسح بالكاميرا</span>
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    value={formData.barcode || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, barcode: e.target.value }))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const value = (e.currentTarget.value || '').trim();
+                        if (value) setFormData(prev => ({ ...prev, barcode: value }));
+                      }
+                    }}
+                    placeholder="وجّه قارئ USB/Bluetooth إلى هذا الحقل ثم امسح الرمز"
+                    aria-label="الباركود الداخلي، جاهز لاستقبال قارئ الباركود"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono focus:outline-hidden focus:border-blue-500"
+                  />
+                  <p className="mt-1 text-[10px] text-slate-500">
+                    يدعم قارئات USB وBluetooth التي تعمل كلوحة مفاتيح؛ ضع المؤشر هنا ثم امسح الملصق. لا يتغير الرقم التسلسلي عند المسح.
+                  </p>
                 </div>
 
                 {isScanningBarcode && (
