@@ -44,8 +44,6 @@ jobs:
         run: flutter pub get
       - name: Analyze
         run: flutter analyze
-      - name: Build Flutter Web
-        run: flutter build web --release
       - name: Build Android APK
         run: flutter build apk --release
       - name: Upload Android APK
@@ -53,12 +51,6 @@ jobs:
         with:
           name: asset-flow-android-apk
           path: mobile/asset_flow_mobile/build/app/outputs/flutter-apk/app-release.apk
-          if-no-files-found: error
-      - name: Upload Flutter web build
-        uses: actions/upload-artifact@v4
-        with:
-          name: asset-flow-flutter-web
-          path: mobile/asset_flow_mobile/build/web
           if-no-files-found: error
 
   ios:
