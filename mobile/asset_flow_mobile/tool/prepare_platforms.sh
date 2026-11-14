@@ -8,11 +8,16 @@ from pathlib import Path
 p = Path("android/app/src/main/AndroidManifest.xml")
 if p.exists():
     s = p.read_text()
-    permission = '    <uses-permission android:name="android.permission.CAMERA" />\n'
-    if "android.permission.CAMERA" not in s:
-        s = s.replace("<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\">\n",
-                      "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\">\n" + permission)
-        p.write_text(s)
+    permissions = [
+        '    <uses-permission android:name="android.permission.CAMERA" />\n',
+        '    <uses-permission android:name="android.permission.INTERNET" />\n',
+    ]
+    for permission in permissions:
+        permission_name = permission.split('name="')[1].split('"')[0]
+        if permission_name not in s:
+            s = s.replace("<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\">\n",
+                          "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\">\n" + permission)
+    p.write_text(s)
 p = Path("ios/Podfile")
 if p.exists():
     s = p.read_text()
