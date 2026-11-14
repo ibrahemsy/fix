@@ -1,4 +1,4 @@
-name: Flutter mobile build
+name: Web and mobile validation
 
 on:
   push:
@@ -10,7 +10,24 @@ on:
   workflow_dispatch:
 
 jobs:
-  analyze-and-build:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install web dependencies
+        working-directory: asset-flow-pwa
+        run: bun install --frozen-lockfile
+      - name: Type check
+        working-directory: asset-flow-pwa
+        run: bun run lint
+      - name: Build React web app
+        working-directory: asset-flow-pwa
+        run: bun run build
+
+  flutter:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -36,4 +53,10 @@ jobs:
         with:
           name: asset-flow-android-apk
           path: mobile/asset_flow_mobile/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+      - name: Upload Flutter web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-flow-flutter-web
+          path: mobile/asset_flow_mobile/build/web
           if-no-files-found: error
