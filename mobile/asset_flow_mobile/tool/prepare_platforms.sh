@@ -13,6 +13,22 @@ if p.exists():
         s = s.replace("<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\">\n",
                       "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\">\n" + permission)
         p.write_text(s)
+p = Path("ios/Podfile")
+if p.exists():
+    s = p.read_text()
+    import re
+    if re.search(r"^\\s*#\\s*platform :ios", s, flags=re.MULTILINE):
+        s = re.sub(r"^\\s*#\\s*platform :ios.*$", "platform :ios, '15.5'", s, count=1, flags=re.MULTILINE)
+    elif re.search(r"^platform :ios", s, flags=re.MULTILINE):
+        s = re.sub(r"^platform :ios.*$", "platform :ios, '15.5'", s, count=1, flags=re.MULTILINE)
+    else:
+        s = "platform :ios, '15.5'\\n" + s
+    p.write_text(s)
+p = Path("ios/Runner.xcodeproj/project.pbxproj")
+if p.exists():
+    s = p.read_text()
+    s = re.sub(r"IPHONEOS_DEPLOYMENT_TARGET = [0-9.]+;", "IPHONEOS_DEPLOYMENT_TARGET = 15.5;", s)
+    p.write_text(s)
 p = Path("ios/Runner/Info.plist")
 if p.exists():
     s = p.read_text()
