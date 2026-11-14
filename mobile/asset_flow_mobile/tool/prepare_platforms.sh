@@ -17,6 +17,10 @@ p = Path("ios/Runner/Info.plist")
 if p.exists():
     s = p.read_text()
     if "NSCameraUsageDescription" not in s:
-        s = s.replace("</dict>", "  <key>NSCameraUsageDescription</key>\n  <string>نحتاج إلى الكاميرا لمسح باركود الأجهزة والعُهد.</string>\n</dict>")
-        p.write_text(s)
+        marker = "</dict>"
+        index = s.rfind(marker)
+        if index >= 0:
+            entry = "  <key>NSCameraUsageDescription</key>\\n  <string>نحتاج إلى الكاميرا لمسح باركود الأجهزة والعُهد.</string>\\n"
+            s = s[:index] + entry + s[index:]
+            p.write_text(s)
 PY
