@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -333,8 +334,8 @@ class _MobileHomeState extends State<MobileHome> {
                       try {
                         final duplicates = await _base.where('serialNumber', isEqualTo: serial.text.trim()).limit(1).get();
                         if (duplicates.docs.isNotEmpty) {
-                          if (sheetContext.mounted) {
-                            ScaffoldMessenger.of(this.context).showSnackBar(
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('هذا الرقم التسلسلي مسجل مسبقاً.')),
                             );
                           }
@@ -343,8 +344,8 @@ class _MobileHomeState extends State<MobileHome> {
                         if (barcode.text.trim().isNotEmpty) {
                           final barcodeDuplicates = await _base.where('barcode', isEqualTo: barcode.text.trim()).limit(1).get();
                           if (barcodeDuplicates.docs.isNotEmpty) {
-                            if (sheetContext.mounted) {
-                              ScaffoldMessenger.of(this.context).showSnackBar(
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('هذا الباركود مرتبط بجهاز آخر.')),
                               );
                             }
@@ -608,10 +609,18 @@ class _MobileHomeState extends State<MobileHome> {
         if (snapshot.hasError) return _errorState(snapshot.error.toString());
         if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
         final docs = snapshot.data!.docs;
-        if (docs.isEmpty) return Center(child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [Icon(icon, size: 42, color: Colors.blueGrey), const SizedBox(height: 10), Text(emptyText)],
-        ));
+        if (docs.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 42, color: Colors.blueGrey),
+                const SizedBox(height: 10),
+                Text(emptyText),
+              ],
+            ),
+          );
+        }
         return ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: docs.length,
