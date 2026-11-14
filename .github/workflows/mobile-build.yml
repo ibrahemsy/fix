@@ -1,0 +1,84 @@
+name: Web and mobile validation
+
+on:
+  push:
+    branches:
+      - release/web-mobile-platform
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: asset-flow-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install web dependencies
+        working-directory: asset-flow-pwa
+        run: bun install --frozen-lockfile
+      - name: Type check
+        working-directory: asset-flow-pwa
+        run: bun run lint
+      - name: Build React web app
+        working-directory: asset-flow-pwa
+        run: bun run build
+
+  flutter:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile/asset_flow_mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate Flutter platform folders and camera permissions
+        run: bash tool/prepare_platforms.sh
+      - name: Install packages
+        run: flutter pub get
+      - name: Analyze
+        run: flutter analyze
+      - name: Build Android APK
+        run: flutter build apk --release
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-flow-android-apk
+          path: mobile/asset_flow_mobile/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+
+  ios:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: mobile/asset_flow_mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate iOS project and camera permission
+        run: bash tool/prepare_platforms.sh
+      - name: Install packages
+        run: flutter pub get
+      - name: Configure iOS deployment target
+        run: python3 tool/configure_ios.py
+      - name: Build iOS without signing
+        run: flutter build ios --release --no-codesign
+      - name: Upload iOS app bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-flow-ios-app
+          path: mobile/asset_flow_mobile/build/ios/iphoneos/Runner.app
+          if-no-files-found: error
