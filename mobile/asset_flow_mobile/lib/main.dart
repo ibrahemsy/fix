@@ -334,7 +334,7 @@ class _MobileHomeState extends State<MobileHome> {
                       try {
                         final duplicates = await _base.where('serialNumber', isEqualTo: serial.text.trim()).limit(1).get();
                         if (duplicates.docs.isNotEmpty) {
-                          if (mounted) {
+                          if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('هذا الرقم التسلسلي مسجل مسبقاً.')),
                             );
@@ -344,7 +344,7 @@ class _MobileHomeState extends State<MobileHome> {
                         if (barcode.text.trim().isNotEmpty) {
                           final barcodeDuplicates = await _base.where('barcode', isEqualTo: barcode.text.trim()).limit(1).get();
                           if (barcodeDuplicates.docs.isNotEmpty) {
-                            if (mounted) {
+                            if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('هذا الباركود مرتبط بجهاز آخر.')),
                               );
