@@ -28,7 +28,7 @@
 
 - Flutter 3.24 أو أحدث.
 - Android Studio / Android SDK لبناء APK.
-- Xcode على macOS لبناء iOS.
+- Xcode على macOS لبناء iOS (الحد الأدنى المستهدف iOS 15.5 بسبب متطلبات مكتبة قارئ الباركود).
 - تفعيل Google في Firebase Authentication.
 - تسجيل تطبيقي Android وiOS الأصليين داخل مشروع Firebase الحالي.
 
