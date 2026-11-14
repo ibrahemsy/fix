@@ -404,11 +404,12 @@ class _MobileHomeState extends State<MobileHome> {
     );
     if (code == null || !mounted) return;
     final snapshot = await _base.get();
-    final match = snapshot.docs.where((doc) {
+    final matches = snapshot.docs.where((doc) {
       final d = doc.data();
       return [d['barcode'], d['serialNumber'], d['assetNumber']]
           .any((value) => value != null && value.toString().trim().toLowerCase() == code.trim().toLowerCase());
-    }).firstOrNull;
+    }).toList();
+    final match = matches.isEmpty ? null : matches.first;
     if (!mounted) return;
     if (match == null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('لم يتم العثور على جهاز بالرمز: $code')));
